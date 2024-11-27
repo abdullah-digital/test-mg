@@ -1,0 +1,997 @@
+<html><head><base href="https://example.com">
+<meta charset="UTF-8">
+<title>اختبار دليل تنفيذ التحويلات المرورية - مستويات متعددة</title>
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        direction: rtl;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 20px;
+    }
+    .quiz-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        width: 95%; /* Make container responsive */
+    }
+    .level-select {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap; /* Allow buttons to wrap on small screens */
+    }
+    .level-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        background-color: #e3f2fd;
+        transition: all 0.3s;
+        margin: 5px; /* Add margin for wrapped buttons */
+    }
+    .level-btn.active {
+        background-color: #2196F3;
+        color: white;
+    }
+    .question {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        word-wrap: break-word; /* Ensure long text wraps properly */
+    }
+    .options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .option {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .option:hover {
+        background-color: #f0f0f0;
+    }
+    .selected {
+        background-color: #e3f2fd;
+    }
+    .correct {
+        background-color: #c8e6c9;
+    }
+    .incorrect {
+        background-color: #ffcdd2;
+    }
+    .submit-btn {
+        background-color: #2196F3;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        margin-top: 20px;
+    }
+    .result {
+        margin-top: 20px;
+        font-weight: bold;
+        text-align: center;
+    }
+    h1 {
+        text-align: center;
+        color: #1976D2;
+    }
+    .english {
+        font-family: 'Courier New', monospace;
+        color: #0d47a1;
+        font-weight: bold;
+    }
+    .translation {
+        color: #666;
+        font-size: 0.9em;
+        margin-right: 5px;
+    }
+    .progress {
+        margin: 20px 0;
+        padding: 10px;
+        background: #e3f2fd;
+        border-radius: 5px;
+        text-align: center;
+    }
+    /* Mobile-specific styles */
+    @media screen and (max-width: 768px) {
+        body {
+            padding: 10px;
+        }
+        
+        .quiz-container {
+            padding: 10px;
+        }
+        
+        .level-btn {
+            width: 100%; /* Full width buttons on mobile */
+            margin: 5px 0;
+        }
+        
+        h1 {
+            font-size: 1.5em;
+        }
+        
+        .option {
+            padding: 15px; /* Larger touch targets */
+        }
+    }
+    /* Tablet-specific styles */
+    @media screen and (min-width: 769px) and (max-width: 1024px) {
+        .quiz-container {
+            width: 90%;
+        }
+        
+        .level-btn {
+            padding: 8px 16px;
+        }
+    }
+</style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>اختبار دليل تنفيذ التحويلات المرورية</h1>
+        <div class="level-select">
+            <button class="level-btn active" onclick="selectLevel('beginner')">مبتدئ (12 سؤال)</button>
+            <button class="level-btn" onclick="selectLevel('intermediate')">متوسط (24 سؤال)</button>
+            <button class="level-btn" onclick="selectLevel('advanced')">متقدم (40 سؤال)</button>
+        </div>
+        <div class="progress" id="progress"></div>
+        <div id="quiz"></div>
+        <button class="submit-btn" onclick="submitQuiz()">تسليم الإجابات</button>
+        <div id="result" class="result"></div>
+    </div>
+
+<script>
+const beginnerQuestions = [
+    {
+        question: "ما هو <span class='english'>Traffic Management Plan (TMP)</span> <span class='translation'>(خطة إدارة المرور)</span>؟",
+        options: [
+            "خطة لتنظيم حركة السير فقط",
+            "خطة شاملة لإدارة السلامة وحركة المرور وتقليل الآثار السلبية",
+            "خطة لوضع الإشارات المرورية فقط",
+            "خطة لتحديد مسارات الطوارئ"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي المناطق الرئيسية في <span class='english'>Work Zone</span> <span class='translation'>(منطقة العمل)</span>؟",
+        options: [
+            "<span class='english'>Advanced Warning, Transition, Activity, Termination</span>",
+            "<span class='english'>Buffer Zone</span> <span class='translation'>(منطقة العازل)</span>",
+            "<span class='english'>Work Area</span> <span class='translation'>(منطقة العمل)</span>",
+            "منطقة الإشارات فقط"
+        ],
+        correct: 0
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Quality Control</span> <span class='translation'>(مراقبة الجودة)</span> في التحويلات المرورية؟",
+        options: [
+            "فحص المعدات فقط",
+            "تفتيش يومي للإشارات والأدوات وتوثيق الفحوصات وإصلاح العيوب فوراً",
+            "صيانة الطرق",
+            "مراقبة حركة المرور"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي شروط استخدام <span class='english'>Portable Traffic Signals</span> <span class='translation'>(إشارات المرور المحمولة)</span>؟",
+        options: [
+            "في جميع المواقع",
+            "عند وجود انحناءات حادة فقط",
+            "في حالات الرؤية المحدودة والتحكم بحركة المرور في اتجاه واحد",
+            "في الطرق السريعة فقط"
+        ],
+        correct: 2
+    },
+    {
+        question: "ما هي مكونات <span class='english'>Traffic Control Devices</span> <span class='translation'>(أجهزة التحكم المروري)</span>؟",
+        options: [
+            "<span class='english'>Signs, Signals, Channelizing Devices, Markings</span>",
+            "الإشارات الضوئية فقط",
+            "العلامات الأرضية فقط",
+            "الحواجز فقط"
+        ],
+        correct: 0
+    },
+    {
+        question: "كيف يتم تطبيق <span class='english'>Risk Assessment</span> <span class='translation'>(تقييم المخاطر)</span> في مواقع العمل؟",
+        options: [
+            "تقييم المخاطر المرورية فقط",
+            "تحديد جميع المخاطر المحتملة وتقييمها ووضع إجراءات التخفيف",
+            "فحص المعدات",
+            "مراقبة العمال"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Emergency Response Plan</span> <span class='translation'>(خطة الاستجابة للطوارئ)</span>؟",
+        options: [
+            "وجود مسعف فقط",
+            "خطة إخلاء فقط",
+            "تحديد مسارات الطوارئ وأرقام الاتصال وإجراءات الاستجابة",
+            "وجود سيارة إسعاف"
+        ],
+        correct: 2
+    },
+    {
+        question: "ما هي شروط استخدام <span class='english'>Variable Message Signs (VMS)</span> <span class='translation'>(علامات الرسائل المتغيرة)</span>؟",
+        options: [
+            "في الطرق السريعة فقط",
+            "في جميع المواقع",
+            "عند الحاجة لتقديم معلومات متغيرة للسائقين في الطرق السريعة والرئيسية",
+            "في المناطق السكنية"
+        ],
+        correct: 2
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Site Access Management</span> <span class='translation'>(إدارة وصول الموقع)</span>؟",
+        options: [
+            "تحديد نقاط الدخول والخروج وتأمينها ووضع إشارات واضحة",
+            "وضع بوابة فقط",
+            "تعيين حارس فقط",
+            "وضع حواجز فقط"
+        ],
+        correct: 0
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Speed Management Strategy</span> <span class='translation'>(استراتيجية إدارة السرعة)</span>؟",
+        options: [
+            "تخفيض السرعة فقط",
+            "وضع كاميرات مراقبة",
+            "استخدام مجموعة من التدابير مثل تخفيض السرعة تدريجياً والإشارات التحذيرية والرادارات",
+            "وضع مطبات صناعية"
+        ],
+        correct: 2
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Worker Safety Training</span> <span class='translation'>(تدريب سلامة العمال)</span>؟",
+        options: [
+            "تدريب بسيط للعمال",
+            "تدريب شامل على السلامة وإجراءات الطوارئ واستخدام معدات الحماية",
+            "توزيع معدات السلامة فقط",
+            "إعطاء تعليمات شفهية"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي شروط تنفيذ <span class='english'>Detour Routes</span> <span class='translation'>(مسارات التحويل)</span>؟",
+        options: [
+            "تحويل حركة المرور فقط",
+            "دراسة شاملة للمسارات البديلة وقدرتها الاستيعابية ووضع خطة إرشادية واضحة",
+            "وضع لافتات تحذيرية",
+            "إغلاق الطريق"
+        ],
+        correct: 1
+    }
+];
+
+const intermediateQuestions = [
+    {
+        question: "ما هو الغرض الرئيسي من <span class='english'>Traffic Guidance Scheme (TGS)</span> <span class='translation'>(مخطط التوجيه المروري)</span>؟",
+        options: [
+            "توجيه حركة المرور بشكل عشوائي",
+            "رسم مخطط تفصيلي يوضح ترتيب وموقع جميع أجهزة التحكم المروري",
+            "تنظيم إشارات المرور فقط",
+            "تحديد مواقع العمال"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Night Work Safety</span> <span class='translation'>(السلامة في العمل الليلي)</span>؟",
+        options: [
+            "إضاءة كافية وملابس عاكسة للضوء وإشارات مضيئة",
+            "استخدام الكشافات فقط",
+            "وجود حراس أمن",
+            "العمل بسرعة أقل"
+        ],
+        correct: 0
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Traffic Control Setup</span> <span class='translation'>(إعداد التحكم المروري)</span>؟",
+        options: [
+            "بشكل عشوائي",
+            "من نقطة أبعد إلى أقرب نقطة لموقع العمل",
+            "من موقع العمل إلى الخارج",
+            "حسب توفر المعدات"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي وظيفة <span class='english'>Buffer Zone</span> <span class='translation'>(منطقة الحماية)</span>؟",
+        options: [
+            "منطقة للراحة",
+            "مساحة آمنة بين منطقة العمل وحركة المرور",
+            "موقف للمركبات",
+            "منطقة تخزين المعدات"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تحديد <span class='english'>Taper Length</span> <span class='translation'>(طول التضييق)</span>؟",
+        options: [
+            "بشكل عشوائي",
+            "حسب عرض الطريق فقط",
+            "باستخدام معادلة تعتمد على السرعة وعرض الإزاحة",
+            "حسب كثافة المرور"
+        ],
+        correct: 2
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Temporary Traffic Signs</span> <span class='translation'>(علامات المرور المؤقتة)</span>؟",
+        options: [
+            "أن تكون واضحة ومرئية وثابتة ومتوافقة مع المعايير",
+            "أن تكون ملونة فقط",
+            "أن تكون كبيرة الحجم",
+            "أن تكون جديدة"
+        ],
+        correct: 0
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Site Inspection</span> <span class='translation'>(تفتيش الموقع)</span>؟",
+        options: [
+            "مرة واحدة أسبوعياً",
+            "فحص يومي صباحاً ومساءً وتوثيق النتائج",
+            "عند وقوع حادث فقط",
+            "مرة شهرياً"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Traffic Controllers</span> <span class='translation'>(مراقبي المرور)</span>؟",
+        options: [
+            "شهادة تدريب معتمدة ومعدات سلامة وموقع آمن",
+            "خبرة سابقة فقط",
+            "القدرة على التواصل",
+            "معرفة الطرق"
+        ],
+        correct: 0
+    },
+    {
+        question: "كيف يتم التعامل مع <span class='english'>Pedestrian Management</span> <span class='translation'>(إدارة المشاة)</span>؟",
+        options: [
+            "منع المشاة تماماً",
+            "توفير مسارات آمنة ومنفصلة مع إشارات واضحة",
+            "تركهم يعبرون بحرية",
+            "تحويلهم لطرق بعيدة"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Vehicle Movement Plan</span> <span class='translation'>(خطة حركة المركبات)</span>؟",
+        options: [
+            "تحديد مسارات دخول وخروج المركبات فقط",
+            "خطة شاملة لحركة جميع المركبات مع تحديد المسارات ونقاط التحميل والتنزيل",
+            "وضع إشارات فقط",
+            "تعيين مراقبين"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Emergency Vehicle Access</span> <span class='translation'>(الوصول لمركبات الطوارئ)</span>؟",
+        options: [
+            "عند الحاجة فقط",
+            "تخصيص مسار دائم ومعروف لمركبات الطوارئ",
+            "إبلاغ خدمات الطوارئ فقط",
+            "استخدام الطرق العادية"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Site Security</span> <span class='translation'>(أمان الموقع)</span>؟",
+        options: [
+            "وضع كاميرات فقط",
+            "تأمين شامل للموقع مع حراسة وإضاءة وسياج",
+            "تعيين حارس",
+            "وضع لافتات تحذيرية"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Incident Management</span> <span class='translation'>(إدارة الحوادث)</span>؟",
+        options: [
+            "الاتصال بالشرطة فقط",
+            "خطة شاملة للتعامل مع الحوادث وتوثيقها والإبلاغ عنها",
+            "إسعاف المصابين فقط",
+            "إغلاق الموقع"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Weather Management Plan</span> <span class='translation'>(خطة إدارة الطقس)</span>؟",
+        options: [
+            "إيقاف العمل في الأمطار فقط",
+            "خطة شاملة للتعامل مع مختلف الظروف الجوية",
+            "توفير معدات للطقس",
+            "متابعة النشرة الجوية"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Site Access Control</span> <span class='translation'>(تحكم وصول الموقع)</span>؟",
+        options: [
+            "تسجيل الدخول فقط",
+            "نظام شامل للتحكم في الدخول مع تصاريح وسجلات",
+            "وضع بوابة",
+            "تعيين حارس"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Construction Vehicle Standards</span> <span class='translation'>(معايير مركبات البناء)</span>؟",
+        options: [
+            "صيانة دورية فقط",
+            "معايير شاملة للسلامة والصيانة والتشغيل",
+            "فحص سنوي",
+            "تدريب السائقين"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Public Communication Plan</span> <span class='translation'>(خطة التواصل مع الجمهور)</span>؟",
+        options: [
+            "إعلانات فقط",
+            "خطة شاملة للتواصل مع الجمهور وإعلامهم بالتغييرات",
+            "وضع لافتات",
+            "توزيع منشورات"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Work Zone Lighting</span> <span class='translation'>(إضاءة منطقة العمل)</span>؟",
+        options: [
+            "إضاءة عامة فقط",
+            "إضاءة كافية لجميع مناطق العمل مع تجنب إبهار السائقين",
+            "كشافات متحركة",
+            "إضاءة الطوارئ"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Traffic Flow Analysis</span> <span class='translation'>(تحليل تدفق المرور)</span>؟",
+        options: [
+            "مراقبة بصرية فقط",
+            "دراسة شاملة لحركة المرور وتأثير التحويلات",
+            "عد المركبات",
+            "تقدير الازدحام"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Temporary Road Marking</span> <span class='translation'>(علامات الطرق المؤقتة)</span>؟",
+        options: [
+            "طلاء عادي فقط",
+            "علامات واضحة وعاكسة مع إزالة العلامات القديمة",
+            "وضع إشارات",
+            "استخدام أشرطة"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Work Zone Compliance</span> <span class='translation'>(امتثال منطقة العمل)</span>؟",
+        options: [
+            "تفتيش عشوائي",
+            "مراقبة مستمرة للامتثال للمعايير والتصحيح الفوري",
+            "تقارير أسبوعية",
+            "شكاوى السائقين"
+        ],
+        correct: 1
+    }
+];
+
+const advancedQuestions = [
+    {
+        question: "ما هي المراحل التفصيلية لتنفيذ <span class='english'>Traffic Management Scheme</span> <span class='translation'>(مخطط إدارة المرور)</span>؟",
+        options: [
+            "تخطيط المسارات فقط",
+            "التخطيط والتنفيذ والمراقبة والتقييم والتحسين المستمر مع توثيق كامل",
+            "وضع الإشارات وتغيير المسارات",
+            "إعداد الخطة وتنفيذها فقط"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تقييم <span class='english'>Road User Delay Impact</span> <span class='translation'>(تأثير التأخير على مستخدمي الطريق)</span>؟",
+        options: [
+            "حساب وقت التأخير فقط",
+            "دراسة شاملة تتضمن تحليل أوقات الذروة، تقدير التأخير، التكلفة الاقتصادية، والتأثير على الخدمات الطارئة",
+            "مراقبة الازدحام",
+            "استطلاع رأي السائقين"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Environmental Impact Mitigation</span> <span class='translation'>(تخفيف الأثر البيئي)</span>؟",
+        options: [
+            "تقليل الضوضاء فقط",
+            "خطة شاملة لتقليل الضوضاء والغبار والانبعاثات والتأثير على المناطق المحيطة",
+            "استخدام معدات حديثة",
+            "العمل في أوقات محددة"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تنظيم <span class='english'>Multi-Phase Traffic Management</span> <span class='translation'>(إدارة المرور متعددة المراحل)</span>؟",
+        options: [
+            "تنفيذ المراحل بالتتابع",
+            "خطة متكاملة تشمل جدولة زمنية، تنسيق بين المراحل، خطط طوارئ لكل مرحلة",
+            "تقسيم العمل إلى مراحل",
+            "تنفيذ كل مرحلة منفصلة"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Stakeholder Communication Strategy</span> <span class='translation'>(استراتيجية التواصل مع الأطراف المعنية)</span>؟",
+        options: [
+            "إرسال إشعارات فقط",
+            "استراتيجية شاملة للتواصل مع جميع الأطراف المعنية، تحديث منتظم، قنوات تواصل متعددة",
+            "عقد اجتماعات دورية",
+            "نشر إعلانات"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تطبيق <span class='english'>Intelligent Transportation Systems (ITS)</span> <span class='translation'>(أنظمة النقل الذكية)</span>؟",
+        options: [
+            "تركيب كاميرات فقط",
+            "دمج أنظمة ذكية للمراقبة والتحكم وإدارة المرور بشكل متكامل",
+            "استخدام إشارات إلكترونية",
+            "تركيب حساسات"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي معايير <span class='english'>Queue Management</span> <span class='translation'>(إدارة الطوابير)</span>؟",
+        options: [
+            "تحديد طول الطابور",
+            "نظام متكامل لمراقبة وإدارة الطوابير مع حدود قصوى وإجراءات تخفيف",
+            "وضع إشارات تحذيرية",
+            "تنظيم حركة المرور"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Road Safety Audit</span> <span class='translation'>(تدقيق السلامة على الطرق)</span>؟",
+        options: [
+            "فحص الطريق فقط",
+            "تدقيق شامل للسلامة يشمل تصميم وتنفيذ وتشغيل التحويلة",
+            "مراجعة الإشارات",
+            "فحص المعدات"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Construction Traffic Impact Assessment</span> <span class='translation'>(تقييم تأثير حركة المرور أثناء البناء)</span>؟",
+        options: [
+            "تقدير حجم المرور",
+            "دراسة شاملة لتأثير حركة مركبات البناء على المرور العام والبنية التحتية",
+            "حساب عدد الشاحنات",
+            "تحديد مسارات النقل"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تطبيق <span class='english'>Variable Speed Limit System</span> <span class='translation'>(نظام حدود السرعة المتغيرة)</span>؟",
+        options: [
+            "تخفيض السرعة فقط",
+            "نظام ديناميكي لتعديل حدود السرعة حسب الظروف مع أنظمة تحكم وإنفاذ",
+            "وضع لافتات السرعة",
+            "مراقبة السرعة"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي عناصر <span class='english'>Work Zone Capacity Analysis</span> <span class='translation'>(تحليل قدرة منطقة العمل)</span>؟",
+        options: [
+            "حساب عدد المركبات",
+            "تحليل شامل لقدرة استيعاب المرور في منطقة العمل وتأثير التضييقات",
+            "مراقبة الازدحام",
+            "قياس عرض الطريق"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Special Event Traffic Management</span> <span class='translation'>(إدارة مرور الأحداث الخاصة)</span>؟",
+        options: [
+            "إغلاق الطرق فقط",
+            "خطة خاصة تشمل توقع حجم المرور، مسارات بديلة، وإجراءات طوارئ",
+            "تنظيم حركة المرور",
+            "وضع إشارات خاصة"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Traffic Signal Timing Optimization</span> <span class='translation'>(تحسين توقيت إشارات المرور)</span>؟",
+        options: [
+            "ضبط التوقيت فقط",
+            "دراسة وتعديل شامل لتوقيت الإشارات لتحسين انسيابية المرور",
+            "تغيير الإشارات",
+            "مراقبة التقاطعات"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تطبيق <span class='english'>Road User Cost Analysis</span> <span class='translation'>(تحليل تكلفة مستخدمي الطريق)</span>؟",
+        options: [
+            "حساب تكلفة الوقود",
+            "تحليل شامل لتكاليف التأخير والتشغيل والحوادث على مستخدمي الطريق",
+            "تقدير الخسائر",
+            "حساب وقت التأخير"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي عناصر <span class='english'>Construction Staging Plan</span> <span class='translation'>(خطة مراحل البناء)</span>؟",
+        options: [
+            "تقسيم العمل فقط",
+            "خطة مفصلة لمراحل البناء مع جدول زمني وخطط مرور لكل مرحلة",
+            "تحديد مواقع العمل",
+            "توزيع المعدات"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Emergency Access Routes</span> <span class='translation'>(مسارات الوصول للطوارئ)</span>؟",
+        options: [
+            "تحديد المسارات فقط",
+            "تخطيط وتنفيذ مسارات طوارئ مع ضمان وصول سريع وآمن",
+            "وضع علامات إرشادية",
+            "إخطار خدمات الطوارئ"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Traffic Data Collection System</span> <span class='translation'>(نظام جمع بيانات المرور)</span>؟",
+        options: [
+            "عد المركبات فقط",
+            "نظام متكامل لجمع وتحليل بيانات المرور باستخدام تقنيات متعددة",
+            "تركيب كاميرات",
+            "إجراء مسح ميداني"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تطبيق <span class='english'>Work Zone Safety Performance Measures</span> <span class='translation'>(قياسات أداء سلامة منطقة العمل)</span>؟",
+        options: [
+            "تسجيل الحوادث فقط",
+            "نظام شامل لقياس وتقييم أداء السلامة مع مؤشرات محددة",
+            "مراقبة العمال",
+            "فحص المعدات"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي عناصر <span class='english'>Traffic Control Device Maintenance Plan</span> <span class='translation'>(خطة صيانة أجهزة التحكم المروري)</span>؟",
+        options: [
+            "تنظيف الإشارات فقط",
+            "خطة شاملة لصيانة وفحص وإصلاح جميع أجهزة التحكم المروري",
+            "استبدال التالف",
+            "فحص دوري"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Business Access Management</span> <span class='translation'>(إدارة وصول الأعمال)</span>؟",
+        options: [
+            "وضع لافتات فقط",
+            "خطة متكاملة لضمان استمرار وصول الزبائن للأعمال المتأثرة",
+            "تحديد مسارات بديلة",
+            "إخطار أصحاب الأعمال"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Traffic Management Center Integration</span> <span class='translation'>(دمج مركز إدارة المرور)</span>؟",
+        options: [
+            "مراقبة المرور فقط",
+            "دمج كامل مع مركز إدارة المرور مع أنظمة مراقبة وتحكم",
+            "تركيب شاشات عرض",
+            "توفير اتصالات"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تطبيق <span class='english'>Work Zone Lighting Design</span> <span class='translation'>(تصميم إضاءة منطقة العمل)</span>؟",
+        options: [
+            "تركيب إضاءة عامة",
+            "تصميم متكامل للإضاءة يضمن رؤية جيدة وسلامة العمال والسائقين",
+            "استخدام كشافات",
+            "إضاءة المعدات"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي عناصر <span class='english'>Project Communication Protocol</span> <span class='translation'>(بروتوكول الاتصال بالمشروع)</span>؟",
+        options: [
+            "إرسال تقارير فقط",
+            "نظام اتصال شامل يحدد المسؤوليات وقنوات التواصل وإجراءات الطوارئ",
+            "عقد اجتماعات",
+            "تبادل المعلومات"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Temporary Traffic Signal Design</span> <span class='translation'>(تصميم إشارات المرور المؤقتة)</span>؟",
+        options: [
+            "تركيب إشارات مؤقتة",
+            "تصميم متكامل يراعي حجم المرور والسلامة وتنسيق التوقيت",
+            "نقل الإشارات القائمة",
+            "برمجة الإشارات"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Construction Vehicle Movement Plan</span> <span class='translation'>(خطة حركة مركبات البناء)</span>؟",
+        options: [
+            "تحديد المسارات فقط",
+            "خطة شاملة لحركة مركبات البناء تشمل التوقيت والمسارات والتحميل",
+            "تنظيم دخول الشاحنات",
+            "وضع جدول زمني"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تطبيق <span class='english'>Traffic Control Quality Management</span> <span class='translation'>(إدارة جودة التحكم المروري)</span>؟",
+        options: [
+            "فحص المعدات فقط",
+            "نظام شامل لضمان جودة التحكم المروري مع معايير ومراجعات منتظمة",
+            "تدريب العاملين",
+            "توثيق الإجراءات"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي عناصر <span class='english'>Work Zone Audit Program</span> <span class='translation'>(برنامج تدقيق منطقة العمل)</span>؟",
+        options: [
+            "تفتيش الموقع فقط",
+            "برنامج تدقيق شامل يشمل السلامة والامتثال والأداء",
+            "مراجعة الوثائق",
+            "فحص المعدات"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Incident Response Procedures</span> <span class='translation'>(إجراءات الاستجابة للحوادث)</span>؟",
+        options: [
+            "الاتصال بالطوارئ فقط",
+            "إجراءات منهجية للاستجابة للحوادث مع أدوار محددة وخطوات واضحة",
+            "إخلاء الموقع",
+            "توثيق الحادث"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Traffic Pattern Change Notification</span> <span class='translation'>(إخطار تغيير نمط المرور)</span>؟",
+        options: [
+            "وضع إشارات فقط",
+            "نظام إخطار شامل يشمل وسائل متعددة وتوقيت مناسب",
+            "إرسال رسائل",
+            "نشر إعلانات"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تطبيق <span class='english'>Site Security Protocol</span> <span class='translation'>(بروتوكول أمان الموقع)</span>؟",
+        options: [
+            "تعيين حراس فقط",
+            "بروتوكول أمني شامل يشمل المراقبة والتحكم بالدخول وإجراءات الطوارئ",
+            "تركيب كاميرات",
+            "إغلاق الموقع"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي عناصر <span class='english'>Traffic Management Review Process</span> <span class='translation'>(عملية مراجعة إدارة المرور)</span>؟",
+        options: [
+            "مراجعة الخطة فقط",
+            "عملية مراجعة منهجية تشمل التقييم والتحسين المستمر",
+            "تحديث الوثائق",
+            "عقد اجتماعات"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Pedestrian Safety Program</span> <span class='translation'>(برنامج سلامة المشاة)</span>؟",
+        options: [
+            "وضع لافتات فقط",
+            "برنامج شامل لسلامة المشاة يشمل مسارات آمنة وإنارة وإشارات",
+            "توفير معابر",
+            "تعيين مراقبين"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Traffic Control Device Inventory</span> <span class='translation'>(جرد أجهزة التحكم المروري)</span>؟",
+        options: [
+            "عد المعدات فقط",
+            "نظام جرد شامل لجميع أجهزة التحكم مع تتبع الحالة والصيانة",
+            "تسجيل الأرقام",
+            "فحص المعدات"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تطبيق <span class='english'>Work Zone Performance Metrics</span> <span class='translation'>(مؤشرات أداء منطقة العمل)</span>؟",
+        options: [
+            "قياس التأخير فقط",
+            "نظام قياس شامل يشمل السلامة والكفاءة ورضا المستخدمين",
+            "جمع البيانات",
+            "إعداد تقارير"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي عناصر <span class='english'>Traffic Monitoring System</span> <span class='translation'>(نظام مراقبة المرور)</span>؟",
+        options: [
+            "تركيب كاميرات فقط",
+            "نظام مراقبة متكامل يشمل أجهزة استشعار وتحليل بيانات",
+            "تسجيل الحركة",
+            "متابعة المرور"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Emergency Management Coordination</span> <span class='translation'>(تنسيق إدارة الطوارئ)</span>؟",
+        options: [
+            "الاتصال بالطوارئ فقط",
+            "تنسيق شامل مع جميع خدمات الطوارئ مع خطط وإجراءات محددة",
+            "تحديد نقاط الاتصال",
+            "وضع خطة طوارئ"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Site Inspection Documentation</span> <span class='translation'>(توثيق تفتيش الموقع)</span>؟",
+        options: [
+            "كتابة ملاحظات فقط",
+            "نظام توثيق شامل للتفتيش مع صور وتقارير وإجراءات تصحيحية",
+            "تعبئة نماذج",
+            "تصوير الموقع"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تطبيق <span class='english'>Traffic Control Device Standards</span> <span class='translation'>(معايير أجهزة التحكم المروري)</span>؟",
+        options: [
+            "اتباع المواصفات فقط",
+            "تطبيق شامل للمعايير مع ضمان التوافق والصيانة والتحديث",
+            "فحص المعدات",
+            "تركيب الأجهزة"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي عناصر <span class='english'>Work Zone Training Program</span> <span class='translation'>(برنامج تدريب منطقة العمل)</span>؟",
+        options: [
+            "تدريب أساسي فقط",
+            "برنامج تدريبي شامل يشمل السلامة والإجراءات والطوارئ",
+            "إعطاء محاضرات",
+            "توزيع كتيبات"
+        ],
+        correct: 1
+    },
+    {
+        question: "كيف يتم تنفيذ <span class='english'>Public Awareness Campaign</span> <span class='translation'>(حملة توعية عامة)</span>؟",
+        options: [
+            "نشر إعلانات فقط",
+            "حملة توعية شاملة تستخدم وسائل متعددة وتستهدف جميع الفئات",
+            "توزيع منشورات",
+            "عقد اجتماعات"
+        ],
+        correct: 1
+    },
+    {
+        question: "ما هي متطلبات <span class='english'>Traffic Management Technology Integration</span> <span class='translation'>(دمج تقنيات إدارة المرور)</span>؟",
+        options: [
+            "تركيب معدات فقط",
+            "دمج شامل للتقنيات الحديثة في إدارة المرور مع أنظمة متكاملة",
+            "استخدام برامج",
+            "تحديث الأجهزة"
+        ],
+        correct: 1
+    }
+];
+
+let currentLevel = 'beginner';
+let currentQuestions = beginnerQuestions;
+let selectedAnswers = new Array(currentQuestions.length).fill(-1);
+
+function selectLevel(level) {
+    currentLevel = level;
+    switch(level) {
+        case 'beginner':
+            currentQuestions = beginnerQuestions;
+            break;
+        case 'intermediate':
+            currentQuestions = intermediateQuestions;
+            break;
+        case 'advanced':
+            currentQuestions = advancedQuestions;
+            break;
+    }
+    selectedAnswers = new Array(currentQuestions.length).fill(-1);
+    
+    // Update UI
+    document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    createQuiz();
+}
+
+function createQuiz() {
+    const quizDiv = document.getElementById('quiz');
+    quizDiv.innerHTML = '';
+    currentQuestions.forEach((q, idx) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question';
+        questionDiv.innerHTML = `
+            <h3>السؤال ${idx + 1}: ${q.question}</h3>
+            <div class="options">
+                ${q.options.map((opt, optIdx) => `
+                    <div class="option" onclick="selectOption(${idx}, ${optIdx})" id="q${idx}o${optIdx}">
+                        ${opt}
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        quizDiv.appendChild(questionDiv);
+    });
+    updateProgress();
+}
+
+function selectOption(questionIdx, optionIdx) {
+    for(let i = 0; i < 4; i++) {
+        document.getElementById(`q${questionIdx}o${i}`).className = 'option';
+    }
+    document.getElementById(`q${questionIdx}o${optionIdx}`).className = 'option selected';
+    selectedAnswers[questionIdx] = optionIdx;
+    updateProgress();
+}
+
+function updateProgress() {
+    const answered = selectedAnswers.filter(x => x !== -1).length;
+    const progressDiv = document.getElementById('progress');
+    progressDiv.innerHTML = `الأسئلة المجاب عليها: ${answered} من ${currentQuestions.length}`;
+}
+
+function submitQuiz() {
+    let score = 0;
+    selectedAnswers.forEach((selected, idx) => {
+        if(selected === currentQuestions[idx].correct) {
+            score++;
+        }
+        for(let i = 0; i < 4; i++) {
+            const optionElement = document.getElementById(`q${idx}o${i}`);
+            if(i === currentQuestions[idx].correct) {
+                optionElement.className = 'option correct';
+            } else if(i === selected && i !== currentQuestions[idx].correct) {
+                optionElement.className = 'option incorrect';
+            }
+        }
+    });
+
+    const resultDiv = document.getElementById('result');
+    const percentage = (score / currentQuestions.length) * 100;
+    resultDiv.innerHTML = `
+        النتيجة: ${score} من ${currentQuestions.length} (${percentage.toFixed(1)}%)
+        <br>
+        ${percentage >= 80 ? 'ممتاز! لقد اجتزت الاختبار بنجاح' : 'حاول مرة أخرى للحصول على نتيجة أفضل'}
+    `;
+}
+
+createQuiz();
+</script>
+</body></html>
